@@ -141,7 +141,7 @@ function renderPins(pins) {
       ${pin.memo ? `<div class="pin-memo">📝 ${escapeHtml(pin.memo)}</div>` : ''}
       <div class="pin-actions">
         <button class="copy-btn" data-id="${pin.id}">${t('copy')}</button>
-        <button class="expand-btn" data-id="${pin.id}">${t('expand')}</button>
+        <button class="expand-btn" data-id="${pin.id}" ${cleanText(pin.text).length <= 100 ? 'style="display:none"' : ''}>${t('expand')}</button>
         <button class="memo-btn" data-id="${pin.id}">${pin.memo ? t('memoEdit') : t('memoAdd')}</button>
         <button class="del-btn" data-id="${pin.id}">${t('memoDelete')}</button>
       </div>
