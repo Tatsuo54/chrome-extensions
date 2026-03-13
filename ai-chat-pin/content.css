@@ -1,0 +1,112 @@
+.acp-pin-btn {
+  display: block;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  padding: 1px 6px;
+  border-radius: 4px;
+  line-height: 1.4;
+  color: #aaa;
+  text-align: right;
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+.acp-pin-btn:hover {
+  background: rgba(0,0,0,0.07);
+  color: #555;
+}
+
+.acp-pin-btn.acp-pinned {
+  opacity: 1 !important;
+  color: #e8a000;
+}
+
+[data-testid="user-message"]:hover .acp-pin-btn,
+.font-claude-response:hover .acp-pin-btn,
+[data-message-author-role]:hover .acp-pin-btn,
+.user-query-container:hover .acp-pin-btn,
+.response-container:hover .acp-pin-btn,
+.acp-wrapper:hover .acp-pin-btn,
+.mt-6.group:hover .acp-pin-btn,
+.pb-3.group:hover .acp-pin-btn {
+  opacity: 1;
+}
+
+/* ホバー時の背景色 - AIメッセージ（オレンジ薄め） */
+.font-claude-response:hover,
+[data-message-author-role="assistant"]:hover,
+.response-container:hover,
+.acp-wrapper:has(model-response):hover,
+.pb-3.group:has(.font-claude-response):hover {
+  background-color: rgba(232, 160, 0, 0.06) !important;
+  border-radius: 6px;
+  transition: background-color 0.15s;
+}
+
+/* ホバー時の背景色 - ユーザーメッセージ（水色薄め） */
+[data-message-author-role="user"]:hover,
+.acp-wrapper:has(user-query):hover,
+.mt-6.group:has([data-testid="user-message"]):hover {
+  background-color: rgba(0, 160, 220, 0.06) !important;
+  border-radius: 6px;
+  transition: background-color 0.15s;
+}
+
+/* ピン済み - AIメッセージ（オレンジ） */
+.font-claude-response:has(.acp-pinned),
+[data-message-author-role="assistant"]:has(.acp-pinned),
+.response-container:has(.acp-pinned),
+.acp-wrapper:has(model-response):has(.acp-pinned),
+.pb-3.group:has(.font-claude-response):has(.acp-pinned) {
+  background-color: rgba(232, 160, 0, 0.12) !important;
+  border-radius: 6px;
+}
+
+/* ピン済み - ユーザーメッセージ（水色） */
+[data-message-author-role="user"]:has(.acp-pinned),
+.acp-wrapper:has(user-query):has(.acp-pinned),
+.mt-6.group:has([data-testid="user-message"]):has(.acp-pinned) {
+  background-color: rgba(0, 160, 220, 0.12) !important;
+  border-radius: 6px;
+}
+
+.acp-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* user-queryの右寄せを維持 */
+  width: 100%;
+}
+
+.acp-wrapper > .acp-pin-btn {
+  align-self: flex-end;
+}
+
+/* ユーザーバブル用 absolute配置ピンボタン */
+.acp-pin-btn--absolute {
+  position: absolute;
+  top: 4px;
+  right: 12px;
+  width: 22px;
+  height: 22px;
+  font-size: 13px;
+  line-height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  opacity: 0;
+  z-index: 10;
+}
+
+.mt-6.group:hover .acp-pin-btn--absolute {
+  opacity: 1;
+}
+
+.acp-pin-btn--absolute.acp-pinned {
+  opacity: 1;
+  background: rgba(0, 160, 220, 0.15);
+}
