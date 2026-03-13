@@ -71,8 +71,10 @@ function t(key) {
 }
 
 function applyLang() {
+  // 言語ボタンのアクティブ表示
+  document.getElementById('lang-ja').className = currentLang === 'ja' ? 'lang-active' : 'lang-inactive';
+  document.getElementById('lang-en').className = currentLang === 'en' ? 'lang-active' : 'lang-inactive';
   // ヘッダーボタン
-  document.getElementById('lang-toggle').textContent = t('langToggle');
   document.getElementById('clear-all').textContent = t('clearAll');
   // 引き継ぎフッター
   document.getElementById('btn-generate').textContent = t('generate');
@@ -343,7 +345,6 @@ document.getElementById('lang-toggle').addEventListener('click', () => {
 // ---- 初期化 ----
 chrome.storage.local.get(['pins', 'lang'], (result) => {
   currentLang = result.lang || 'ja';
-  document.getElementById('lang-toggle').textContent = t('langToggle');
   document.getElementById('clear-all').textContent = t('clearAll');
   document.getElementById('btn-generate').textContent = t('generate');
   document.getElementById('btn-copy-handoff').textContent = t('handoffCopy');

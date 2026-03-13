@@ -16,7 +16,7 @@
 }
 
 .acp-pin-btn:hover {
-  background: rgba(0,0,0,0.07);
+  background: none;
   color: #555;
 }
 
@@ -39,11 +39,10 @@
 /* ホバー時の背景色 - AIメッセージ（オレンジ薄め） */
 .font-claude-response:hover,
 [data-message-author-role="assistant"]:hover,
-.response-container:hover,
 .acp-wrapper:has(model-response):hover,
 .pb-3.group:has(.font-claude-response):hover {
-  background-color: rgba(232, 160, 0, 0.06) !important;
-  border-radius: 6px;
+  background-color: rgba(232, 160, 0, 0.05) !important;
+  border-radius: 10px;
   transition: background-color 0.15s;
 }
 
@@ -51,19 +50,18 @@
 [data-message-author-role="user"]:hover,
 .acp-wrapper:has(user-query):hover,
 .mt-6.group:has([data-testid="user-message"]):hover {
-  background-color: rgba(0, 160, 220, 0.06) !important;
-  border-radius: 6px;
+  background-color: rgba(0, 160, 220, 0.05) !important;
+  border-radius: 10px;
   transition: background-color 0.15s;
 }
 
 /* ピン済み - AIメッセージ（オレンジ） */
 .font-claude-response:has(.acp-pinned),
 [data-message-author-role="assistant"]:has(.acp-pinned),
-.response-container:has(.acp-pinned),
 .acp-wrapper:has(model-response):has(.acp-pinned),
 .pb-3.group:has(.font-claude-response):has(.acp-pinned) {
   background-color: rgba(232, 160, 0, 0.12) !important;
-  border-radius: 6px;
+  border-radius: 10px;
 }
 
 /* ピン済み - ユーザーメッセージ（水色） */
@@ -71,7 +69,7 @@
 .acp-wrapper:has(user-query):has(.acp-pinned),
 .mt-6.group:has([data-testid="user-message"]):has(.acp-pinned) {
   background-color: rgba(0, 160, 220, 0.12) !important;
-  border-radius: 6px;
+  border-radius: 10px;
 }
 
 .acp-wrapper {
@@ -79,6 +77,13 @@
   flex-direction: column;
   align-items: flex-end; /* user-queryの右寄せを維持 */
   width: 100%;
+}
+
+/* Gemini: ピン済み時にmodel-response内部の白背景を透明に */
+.acp-wrapper:has(model-response):has(.acp-pinned) model-response,
+.acp-wrapper:has(model-response):has(.acp-pinned) .response-container,
+.acp-wrapper:has(model-response):has(.acp-pinned) message-content {
+  background: transparent !important;
 }
 
 .acp-wrapper > .acp-pin-btn {

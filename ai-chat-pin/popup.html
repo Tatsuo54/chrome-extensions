@@ -41,7 +41,10 @@
     .btn:hover { background: #e8e8e8; }
     .btn-danger { border-color: #f0a0a0; background: #fff5f5; color: #c00; }
     .btn-danger:hover { background: #ffe0e0; }
-    .btn-lang { border-color: #a0b8d0; background: #f0f6ff; color: #336; font-weight: 600; min-width: 28px; }
+    .btn-lang { border-color: #a0b8d0; background: #f0f6ff; color: #aaa; font-weight: 600; min-width: 52px; display: flex; align-items: center; gap: 3px; }
+    .lang-sep { color: #ccc; font-weight: 300; }
+    .lang-active { color: #1a5cb0; font-weight: 700; }
+    .lang-inactive { color: #aaa; font-weight: 400; }
 
     #pin-list {
       flex: 1;
@@ -214,7 +217,7 @@
   <header>
     <h1>📌 AI Chat Pin</h1>
     <div class="header-actions">
-      <button class="btn btn-lang" id="lang-toggle">EN</button>
+      <button class="btn btn-lang" id="lang-toggle"><span id="lang-ja" class="lang-active">JA</span> <span class="lang-sep">|</span> <span id="lang-en">EN</span></button>
       <button class="btn" id="export-txt">TXT</button>
       <button class="btn" id="export-csv">CSV</button>
       <button class="btn btn-danger" id="clear-all">全削除</button>
