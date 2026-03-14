@@ -6,7 +6,14 @@ const TOOLTIP = {
   en: { pinned: 'Pinned (click to unpin)', pin: 'Pin this message' }
 };
 let _lang = 'ja';
-chrome.storage.local.get(['lang'], (r) => { if (r.lang) _lang = r.lang; });
+let _enabled = true;
+chrome.storage.local.get(['lang', 'enabled'], (r) => {
+  if (r.lang) _lang = r.lang;
+  if (r.enabled === false) {
+    _enabled = false;
+    document.body.classList.add('acp-disabled');
+  }
+});;
 function tipPinned() { return TOOLTIP[_lang]?.pinned || TOOLTIP.ja.pinned; }
 function tipPin()    { return TOOLTIP[_lang]?.pin    || TOOLTIP.ja.pin;    }
 
@@ -234,18 +241,28 @@ function unpinMessage(fingerprint, btn) {
   });
 }
 
-const observer = new MutationObserver(() => injectPinButtons());
+const observer = new MutationObserver(() => { if (_enabled) injectPinButtons(); });
 observer.observe(document.body, { childList: true, subtree: true });
 
-loadPinnedFingerprints(() => injectPinButtons());
+loadPinnedFingerprints(() => { if (_enabled) injectPinButtons(); });
 
-// 言語変更メッセージ受信
+// 言語変更・ON/OFF切り替えメッセージ受信
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'LANG_CHANGED') {
     _lang = msg.lang;
-    // 表示中のピンボタンのtooltipを更新
     document.querySelectorAll('.acp-pin-btn').forEach(btn => {
       btn.title = btn.classList.contains('acp-pinned') ? tipPinned() : tipPin();
     });
+  }
+  if (msg.type === 'ENABLED_CHANGED') {
+    _enabled = msg.enabled;
+    if (_enabled) {
+      document.body.classList.remove('acp-disabled');
+      injectPinButtons();
+    } else {
+      document.body.classList.add('acp-disabled');
+      // ピン済み以外のボタンを非表示
+      document.querySelectorAll('.acp-pin-btn:not(.acp-pinned)').forEach(btn => btn.remove());
+    }
   }
 });

@@ -47,6 +47,8 @@
     .lang-sep { color: #ccc; font-weight: 300; }
     .lang-active { color: #1a5cb0; font-weight: 700; }
     .lang-inactive { color: #aaa; font-weight: 400; }
+    .btn-toggle-on  { border-color: #6abf6a; background: #f0fff0; color: #2a7a2a; font-weight: 700; min-width: 42px; }
+    .btn-toggle-off { border-color: #ccc;    background: #f5f5f5; color: #999;    font-weight: 700; min-width: 42px; }
 
     #pin-list {
       flex: 1;
@@ -221,6 +223,7 @@
   <header>
     <h1>📌 AI Chat Pin</h1>
     <div class="header-actions">
+      <button class="btn btn-toggle-on" id="toggle-enabled">ON</button>
       <button class="btn btn-lang" id="lang-toggle"><span id="lang-ja" class="lang-active">JA</span> <span class="lang-sep">|</span> <span id="lang-en">EN</span></button>
       <button class="btn" id="export-txt">TXT</button>
       <button class="btn" id="export-csv">CSV</button>

@@ -330,12 +330,35 @@ function downloadFile(filename, content, type) {
   URL.revokeObjectURL(url);
 }
 
+// ---- ON/OFF切り替え ----
+let currentEnabled = true;
+
+function applyEnabled() {
+  const btn = document.getElementById('toggle-enabled');
+  if (currentEnabled) {
+    btn.textContent = 'ON';
+    btn.className = 'btn btn-toggle-on';
+  } else {
+    btn.textContent = 'OFF';
+    btn.className = 'btn btn-toggle-off';
+  }
+}
+
+document.getElementById('toggle-enabled').addEventListener('click', () => {
+  currentEnabled = !currentEnabled;
+  chrome.storage.local.set({ enabled: currentEnabled }, () => {
+    applyEnabled();
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, { type: 'ENABLED_CHANGED', enabled: currentEnabled });
+    });
+  });
+});
+
 // ---- 言語切り替え ----
 document.getElementById('lang-toggle').addEventListener('click', () => {
   currentLang = currentLang === 'ja' ? 'en' : 'ja';
   chrome.storage.local.set({ lang: currentLang }, () => {
     applyLang();
-    // content.jsにも言語変更を通知（アクティブタブ）
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, { type: 'LANG_CHANGED', lang: currentLang });
     });
@@ -343,8 +366,10 @@ document.getElementById('lang-toggle').addEventListener('click', () => {
 });
 
 // ---- 初期化 ----
-chrome.storage.local.get(['pins', 'lang'], (result) => {
+chrome.storage.local.get(['pins', 'lang', 'enabled'], (result) => {
   currentLang = result.lang || 'ja';
+  currentEnabled = result.enabled !== false;
+  applyEnabled();
   document.getElementById('clear-all').textContent = t('clearAll');
   document.getElementById('btn-generate').textContent = t('generate');
   document.getElementById('btn-copy-handoff').textContent = t('handoffCopy');

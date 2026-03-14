@@ -90,7 +90,16 @@
   align-self: flex-end;
 }
 
-/* ユーザーバブル用 absolute配置ピンボタン */
+/* OFF時：ホバー背景色・ピンボタンを無効化 */
+body.acp-disabled .acp-pin-btn:not(.acp-pinned) { display: none !important; }
+body.acp-disabled .font-claude-response:hover,
+body.acp-disabled [data-message-author-role]:hover,
+body.acp-disabled .acp-wrapper:hover,
+body.acp-disabled .mt-6.group:hover,
+body.acp-disabled .pb-3.group:hover {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
 .acp-pin-btn--absolute {
   position: absolute;
   top: 4px;
