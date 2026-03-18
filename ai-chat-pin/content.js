@@ -246,6 +246,18 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 loadPinnedFingerprints(() => { if (_enabled) injectPinButtons(); });
 
+// ストレージ変更を監視（全削除時にUIをリセット）
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes.pins && Array.isArray(changes.pins.newValue) && changes.pins.newValue.length === 0) {
+    // 全削除された場合：ピン済みボタンをリセット、背景色を解除
+    pinnedFingerprints.clear();
+    document.querySelectorAll('.acp-pin-btn.acp-pinned').forEach(btn => {
+      btn.classList.remove('acp-pinned');
+      btn.title = tipPin();
+    });
+  }
+});
+
 // 言語変更・ON/OFF切り替えメッセージ受信
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'LANG_CHANGED') {

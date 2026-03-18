@@ -1,12 +1,11 @@
 {
   "manifest_version": 3,
   "name": "AI Chat Pin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Pin important AI chat messages for handoff and note-taking. Supports Claude, ChatGPT, and Gemini.",
   "permissions": [
     "storage",
-    "activeTab",
-    "tabs"
+    "activeTab"
   ],
   "host_permissions": [
     "https://claude.ai/*",
