@@ -41,10 +41,17 @@ const SITE_CONFIG = {
   'gemini.google.com': {
     messageSelector: 'user-query, model-response',
     getTextContent: (el) => {
-      const textEl = el.tagName.toLowerCase() === 'user-query'
+      const isUser = el.tagName.toLowerCase() === 'user-query';
+      const textEl = isUser
         ? el.querySelector('div.query-content')
         : el.querySelector('message-content .markdown');
-      return textEl ? extractStructuredText(textEl, true) : '';
+      if (!textEl) return '';
+      let text = extractStructuredText(textEl, true);
+      // Gemini user-queryの先頭に「あなたのプロンプト」等のラベルが入るため除去
+      if (isUser) {
+        text = text.replace(/^(?:あなたのプロンプト|Your prompt)\s*/i, '');
+      }
+      return text;
     },
     getLabelPrefix: (el) => el.tagName.toLowerCase() === 'user-query' ? '[You] ' : '[Gemini] ',
     insertBefore: true,
@@ -246,35 +253,36 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 loadPinnedFingerprints(() => { if (_enabled) injectPinButtons(); });
 
-// ストレージ変更を監視（全削除時にUIをリセット）
+// ストレージ変更を監視（言語変更・ON/OFF・全削除に対応）
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes.pins && Array.isArray(changes.pins.newValue) && changes.pins.newValue.length === 0) {
-    // 全削除された場合：ピン済みボタンをリセット、背景色を解除
-    pinnedFingerprints.clear();
-    document.querySelectorAll('.acp-pin-btn.acp-pinned').forEach(btn => {
-      btn.classList.remove('acp-pinned');
-      btn.title = tipPin();
-    });
-  }
-});
+  if (area !== 'local') return;
 
-// 言語変更・ON/OFF切り替えメッセージ受信
-chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.type === 'LANG_CHANGED') {
-    _lang = msg.lang;
+  // 言語変更
+  if (changes.lang) {
+    _lang = changes.lang.newValue || 'ja';
     document.querySelectorAll('.acp-pin-btn').forEach(btn => {
       btn.title = btn.classList.contains('acp-pinned') ? tipPinned() : tipPin();
     });
   }
-  if (msg.type === 'ENABLED_CHANGED') {
-    _enabled = msg.enabled;
+
+  // ON/OFF変更
+  if (changes.enabled !== undefined) {
+    _enabled = changes.enabled.newValue !== false;
     if (_enabled) {
       document.body.classList.remove('acp-disabled');
       injectPinButtons();
     } else {
       document.body.classList.add('acp-disabled');
-      // ピン済み以外のボタンを非表示
       document.querySelectorAll('.acp-pin-btn:not(.acp-pinned)').forEach(btn => btn.remove());
     }
+  }
+
+  // 全削除
+  if (changes.pins && Array.isArray(changes.pins.newValue) && changes.pins.newValue.length === 0) {
+    pinnedFingerprints.clear();
+    document.querySelectorAll('.acp-pin-btn.acp-pinned').forEach(btn => {
+      btn.classList.remove('acp-pinned');
+      btn.title = tipPin();
+    });
   }
 });

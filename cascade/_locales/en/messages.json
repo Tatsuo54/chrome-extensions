@@ -1,0 +1,67 @@
+{
+  "extName": {
+    "message": "Cascade: Tab & Bookmark Organizer"
+  },
+  "extDescription": {
+    "message": "View and organize your open tabs and bookmarks in a side panel, grouped by domain in a clean tree view."
+  },
+  "actionTitle": {
+    "message": "Open Cascade"
+  },
+  "tabTabs": {
+    "message": "Tabs"
+  },
+  "tabBookmarks": {
+    "message": "Bookmarks"
+  },
+  "searchPlaceholder": {
+    "message": "Search..."
+  },
+  "toastTabClosed": {
+    "message": "Tab closed"
+  },
+  "toastTabsClosed": {
+    "message": "$COUNT$ tabs closed",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "undo": {
+    "message": "Undo"
+  },
+  "menuCopyUrl": {
+    "message": "Copy URL"
+  },
+  "menuPinTab": {
+    "message": "Pin tab"
+  },
+  "menuUnpinTab": {
+    "message": "Unpin tab"
+  },
+  "menuCloseTab": {
+    "message": "Close tab"
+  },
+  "menuOpenNewTab": {
+    "message": "Open in new tab"
+  },
+  "menuOpenIncognito": {
+    "message": "Open in incognito window"
+  },
+  "tooltipCloseGroup": {
+    "message": "Close all tabs in this group"
+  },
+  "tooltipCloseTab": {
+    "message": "Close tab"
+  },
+  "untitledPage": {
+    "message": "Untitled page"
+  },
+  "folder": {
+    "message": "Folder"
+  },
+  "loading": {
+    "message": "Loading..."
+  }
+}

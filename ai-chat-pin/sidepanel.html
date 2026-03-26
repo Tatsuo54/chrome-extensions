@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      background: #fff;
+    }
+
+    /* ---- Header: 2行構成 ---- */
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      padding: 10px 12px;
+      border-bottom: 1px solid #e5e5e5;
+      flex-shrink: 0;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Segmented control */
+    .seg {
+      display: inline-flex;
+      background-color: #e2e8f0;
+      border-radius: 6px;
+      padding: 2px;
+    }
+    .seg input[type="radio"] { display: none; }
+    .seg label {
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: bold;
+      color: #64748b;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .seg input[type="radio"]:checked + label {
+      background-color: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .separator {
+      width: 1px;
+      height: 16px;
+      background: #e0e0e0;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #d0d0d0;
+      background: #f8f8f8;
+      cursor: pointer;
+      font-size: 10px;
+      color: #666;
+      height: 24px;
+      line-height: 1;
+      transition: background 0.1s;
+    }
+    .btn:hover { background: #eee; }
+    .btn:active { background: #e0e0e0; }
+
+    .btn-danger {
+      border-color: #e8c0c0;
+      background: #fff;
+      color: #b44;
+    }
+    .btn-danger:hover { background: #fef2f2; }
+
+    .pin-count {
+      font-size: 11px;
+      color: #aaa;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .spacer { flex: 1; }
+
+    /* ---- Pin List ---- */
+    #pin-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      min-height: 0;
+    }
+
+    .empty {
+      text-align: center;
+      color: #bbb;
+      padding: 48px 20px;
+      line-height: 1.7;
+      font-size: 12px;
+    }
+    .empty-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    .pin-item {
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      transition: border-color 0.15s;
+    }
+    .pin-item:hover { border-color: #ccc; }
+
+    .pin-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 5px;
+    }
+    .pin-label { font-weight: 600; font-size: 11px; color: #555; }
+    .pin-site {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .pin-site.site-claude { background: #fff7ed; color: #c2410c; }
+    .pin-site.site-chatgpt { background: #ecfdf5; color: #166534; }
+    .pin-site.site-gemini { background: #eff6ff; color: #1d4ed8; }
+    .pin-site.site-unknown { background: #f4f4f5; color: #999; }
+    .pin-time { font-size: 10px; color: #ccc; margin-left: auto; }
+
+    .pin-text {
+      font-size: 12px;
+      color: #333;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 72px;
+      overflow: hidden;
+    }
+    .pin-text.expanded { max-height: none; }
+
+    .pin-memo {
+      font-size: 11px;
+      color: #92600a;
+      background: #fffbeb;
+      border-left: 3px solid #f59e0b;
+      padding: 5px 8px;
+      margin-top: 6px;
+      border-radius: 0 5px 5px 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .pin-actions {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .pin-actions button {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #e0e0e0;
+      background: none;
+      cursor: pointer;
+      color: #666;
+      height: 22px;
+      line-height: 1;
+      transition: background 0.1s;
+    }
+    .pin-actions button:hover { background: #f5f5f5; }
+    .pin-actions .del-btn { color: #b44; border-color: #e8c0c0; margin-left: auto; }
+    .pin-actions .del-btn:hover { background: #fef2f2; }
+    .copied { color: #16a34a !important; }
+
+    .memo-editor { margin-top: 8px; }
+    .memo-input {
+      width: 100%;
+      height: 56px;
+      font-size: 12px;
+      padding: 6px 8px;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      resize: vertical;
+      font-family: inherit;
+      line-height: 1.5;
+    }
+    .memo-input:focus { outline: none; border-color: #93c5fd; }
+    .memo-editor-actions { display: flex; gap: 5px; margin-top: 5px; }
+    .memo-editor-actions button {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 5px;
+      border: 1px solid #d0d0d0;
+      background: none;
+      cursor: pointer;
+    }
+    .memo-save-btn { background: #1a1a1a !important; color: #fff !important; border-color: #1a1a1a !important; }
+
+    /* ---- Handoff Footer ---- */
+    .handoff-footer {
+      border-top: 1px solid #e5e5e5;
+      flex-shrink: 0;
+      background: #fafafa;
+    }
+
+    .handoff-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.1s;
+    }
+    .handoff-header:hover { background: #f0f0f0; }
+    .handoff-title { font-size: 12px; font-weight: 600; color: #555; }
+    .handoff-toggle { font-size: 11px; color: #bbb; }
+
+    .handoff-body { padding: 0 12px 10px; display: none; }
+    .handoff-body.open { display: block; }
+
+    .handoff-actions { display: flex; gap: 6px; margin-bottom: 6px; }
+    .btn-generate {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #3b82f6;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-generate:hover { background: #dbeafe; }
+    .btn-copy-handoff {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #d0d0d0;
+      background: none;
+      cursor: pointer;
+      color: #555;
+    }
+    .btn-copy-handoff:hover { background: #f5f5f5; }
+
+    #handoff-text {
+      width: 100%;
+      height: 110px;
+      font-size: 11px;
+      padding: 6px 8px;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      resize: vertical;
+      font-family: inherit;
+      line-height: 1.5;
+      color: #333;
+      background: #fff;
+    }
+    #handoff-text:focus { outline: none; border-color: #93c5fd; }
+
+    .handoff-hint {
+      font-size: 10px;
+      color: #bbb;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Row 1: トグル系 -->
+    <div class="header-row">
+      <div class="seg" id="toggle-enabled">
+        <input type="radio" id="tog-on" name="tog" value="on" checked>
+        <label for="tog-on">ON</label>
+        <input type="radio" id="tog-off" name="tog" value="off">
+        <label for="tog-off">OFF</label>
+      </div>
+      <div class="separator"></div>
+      <div class="seg" id="lang-toggle">
+        <input type="radio" id="lang-ja" name="lang" value="ja" checked>
+        <label for="lang-ja">JA</label>
+        <input type="radio" id="lang-en" name="lang" value="en">
+        <label for="lang-en">EN</label>
+      </div>
+    </div>
+    <!-- Row 2: エクスポート + ピン数 + 全削除 -->
+    <div class="header-row">
+      <button class="btn" id="export-txt">TXT</button>
+      <button class="btn" id="export-csv">CSV</button>
+      <span class="pin-count" id="pin-count">0 pins</span>
+      <span class="spacer"></span>
+      <button class="btn btn-danger" id="clear-all">全削除</button>
+    </div>
+  </header>
+
+  <div id="pin-list">
+    <div class="empty">
+      <div class="empty-icon">📌</div>
+      ピンがありません<br><br>
+      チャット画面でメッセージにホバーすると<br>📌 ボタンが表示されます
+    </div>
+  </div>
+
+  <!-- 引き継ぎフッター -->
+  <div class="handoff-footer">
+    <div class="handoff-header" id="handoff-toggle">
+      <span class="handoff-title">🔗 引き継ぎ</span>
+      <span class="handoff-toggle" id="handoff-arrow">▲ 開く</span>
+    </div>
+    <div class="handoff-body" id="handoff-body">
+      <div class="handoff-actions">
+        <button class="btn-generate" id="btn-generate">自動生成</button>
+        <button class="btn-copy-handoff" id="btn-copy-handoff">コピー</button>
+      </div>
+      <textarea id="handoff-text" placeholder="「自動生成」でピン内容から引き継ぎ文を生成、または直接入力してください。"></textarea>
+      <div class="handoff-hint">エクスポート（TXT/CSV）にも引き継ぎ内容が含まれます</div>
+    </div>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

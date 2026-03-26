@@ -1,0 +1,67 @@
+{
+  "extName": {
+    "message": "Cascade: タブ＆ブックマーク整理"
+  },
+  "extDescription": {
+    "message": "開いているタブとブックマークをサイドパネルにドメインごとのツリー表示で整理します。"
+  },
+  "actionTitle": {
+    "message": "Cascadeを開く"
+  },
+  "tabTabs": {
+    "message": "タブ"
+  },
+  "tabBookmarks": {
+    "message": "ブックマーク"
+  },
+  "searchPlaceholder": {
+    "message": "検索..."
+  },
+  "toastTabClosed": {
+    "message": "タブを閉じました"
+  },
+  "toastTabsClosed": {
+    "message": "$COUNT$個のタブを閉じました",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "undo": {
+    "message": "元に戻す"
+  },
+  "menuCopyUrl": {
+    "message": "URLをコピー"
+  },
+  "menuPinTab": {
+    "message": "タブをピン留め"
+  },
+  "menuUnpinTab": {
+    "message": "ピン留めを解除"
+  },
+  "menuCloseTab": {
+    "message": "タブを閉じる"
+  },
+  "menuOpenNewTab": {
+    "message": "新しいタブで開く"
+  },
+  "menuOpenIncognito": {
+    "message": "シークレットウィンドウで開く"
+  },
+  "tooltipCloseGroup": {
+    "message": "このグループのタブをすべて閉じる"
+  },
+  "tooltipCloseTab": {
+    "message": "タブを閉じる"
+  },
+  "untitledPage": {
+    "message": "無題のページ"
+  },
+  "folder": {
+    "message": "フォルダ"
+  },
+  "loading": {
+    "message": "読み込み中..."
+  }
+}

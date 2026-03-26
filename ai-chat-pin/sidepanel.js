@@ -1,11 +1,10 @@
-// AI Chat Pin - Popup Script
+// AI Chat Pin - Side Panel Script
 
 // ---- i18n ----
 const i18n = {
   ja: {
     clearAll:        '全削除',
-    langToggle:      'EN',
-    empty:           'ピンがありません<br><br>チャット画面でメッセージにホバーすると<br>📌 ボタンが表示されます',
+    empty:           '<div class="empty-icon">📌</div>ピンがありません<br><br>チャット画面でメッセージにホバーすると<br>📌 ボタンが表示されます',
     copy:            'コピー',
     copied:          'コピー済',
     expand:          'もっと見る',
@@ -31,11 +30,11 @@ const i18n = {
     handoffHeader:   '以下は前の会話でピンした重要な内容です。これを踏まえて、次のチャットでスムーズに会話を継続できるよう引き継ぎ文を作成してください。',
     handoffFooter:   '1. 確定した方針・制約をまとめる\n2. 現在進行中のタスクと次のアクションを整理する\n3. 次のチャット冒頭に貼り付ける引き継ぎ文を作成する',
     exportHandoff:   '========== 引き継ぎ ==========',
+    pinCount:        (n) => `${n} pins`,
   },
   en: {
     clearAll:        'Clear All',
-    langToggle:      'JA',
-    empty:           'No pins yet<br><br>Hover over any message in chat<br>to see the 📌 button',
+    empty:           '<div class="empty-icon">📌</div>No pins yet<br><br>Hover over any message in chat<br>to see the 📌 button',
     copy:            'Copy',
     copied:          'Copied',
     expand:          'Show more',
@@ -61,6 +60,7 @@ const i18n = {
     handoffHeader:   'The following are important points pinned from a previous conversation. Based on these, please create a handoff message for seamless continuation in the next chat.',
     handoffFooter:   '1. Summarize confirmed decisions and constraints\n2. Organize current tasks and next actions\n3. Write a handoff message to paste at the start of the next chat',
     exportHandoff:   '========== Handoff ==========',
+    pinCount:        (n) => `${n} pins`,
   }
 };
 
@@ -70,23 +70,29 @@ function t(key) {
   return i18n[currentLang][key] || i18n.ja[key] || key;
 }
 
+function updatePinCount(count) {
+  const el = document.getElementById('pin-count');
+  if (el) el.textContent = t('pinCount')(count);
+}
+
 function applyLang() {
-  // 言語ボタンのアクティブ表示
-  document.getElementById('lang-ja').className = currentLang === 'ja' ? 'lang-active' : 'lang-inactive';
-  document.getElementById('lang-en').className = currentLang === 'en' ? 'lang-active' : 'lang-inactive';
-  // ヘッダーボタン
+  // Update segmented control selection
+  document.getElementById('lang-ja').checked = (currentLang === 'ja');
+  document.getElementById('lang-en').checked = (currentLang === 'en');
+
   document.getElementById('clear-all').textContent = t('clearAll');
-  // 引き継ぎフッター
   document.getElementById('btn-generate').textContent = t('generate');
   document.getElementById('btn-copy-handoff').textContent = t('handoffCopy');
   document.getElementById('handoff-text').placeholder = t('handoffPlaceholder');
   document.querySelector('.handoff-hint').textContent = t('handoffHint');
   document.querySelector('.handoff-title').textContent = t('handoffTitle');
-  // 引き継ぎ矢印（開閉状態に応じて）
   const arrow = document.getElementById('handoff-arrow');
   if (arrow) arrow.textContent = handoffOpen ? t('handoffClose') : t('handoffOpen');
-  // ピン一覧を再描画（テキスト反映）
-  chrome.storage.local.get(['pins'], (result) => renderPins(result.pins || []));
+  chrome.storage.local.get(['pins'], (result) => {
+    const pins = result.pins || [];
+    renderPins(pins);
+    updatePinCount(pins.length);
+  });
 }
 
 function formatDate(iso) {
@@ -124,6 +130,7 @@ function escapeHtml(str) {
 
 function renderPins(pins) {
   const list = document.getElementById('pin-list');
+  updatePinCount(pins.length);
 
   if (!pins || pins.length === 0) {
     list.innerHTML = `<div class="empty">${t('empty')}</div>`;
@@ -190,7 +197,7 @@ function renderPins(pins) {
         const updated = (result.pins || []).map(p =>
           p.id == btn.dataset.id ? { ...p, memo } : p
         );
-        chrome.storage.local.set({ pins: updated }, () => renderPins(updated));
+        chrome.storage.local.set({ pins: updated });
       });
     });
   });
@@ -205,15 +212,33 @@ function renderPins(pins) {
     btn.addEventListener('click', () => {
       chrome.storage.local.get(['pins'], (result) => {
         const updated = (result.pins || []).filter(p => p.id != btn.dataset.id);
-        chrome.storage.local.set({ pins: updated }, () => renderPins(updated));
+        chrome.storage.local.set({ pins: updated });
       });
     });
   });
 }
 
+// ---- リアルタイム更新 ----
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== 'local') return;
+
+  if (changes.pins) {
+    renderPins(changes.pins.newValue || []);
+  }
+
+  if (changes.lang) {
+    currentLang = changes.lang.newValue || 'ja';
+    applyLang();
+  }
+
+  if (changes.enabled !== undefined) {
+    currentEnabled = changes.enabled.newValue !== false;
+    applyEnabled();
+  }
+});
+
 // ---- 引き継ぎフッター ----
 
-// 開閉
 const handoffToggle = document.getElementById('handoff-toggle');
 const handoffBody = document.getElementById('handoff-body');
 const handoffArrow = document.getElementById('handoff-arrow');
@@ -223,7 +248,6 @@ handoffToggle.addEventListener('click', () => {
   handoffOpen = !handoffOpen;
   handoffBody.classList.toggle('open', handoffOpen);
   handoffArrow.textContent = handoffOpen ? t('handoffClose') : t('handoffOpen');
-  // 保存済みの引き継ぎ文を復元
   if (handoffOpen) {
     chrome.storage.local.get(['handoff'], (result) => {
       if (result.handoff) {
@@ -233,12 +257,10 @@ handoffToggle.addEventListener('click', () => {
   }
 });
 
-// 引き継ぎ文の編集を自動保存
 document.getElementById('handoff-text').addEventListener('input', (e) => {
   chrome.storage.local.set({ handoff: e.target.value });
 });
 
-// 自動生成
 document.getElementById('btn-generate').addEventListener('click', () => {
   chrome.storage.local.get(['pins'], (result) => {
     const pins = result.pins || [];
@@ -252,7 +274,6 @@ document.getElementById('btn-generate').addEventListener('click', () => {
   });
 });
 
-// コピー
 document.getElementById('btn-copy-handoff').addEventListener('click', () => {
   const text = document.getElementById('handoff-text').value;
   if (!text) return;
@@ -276,10 +297,6 @@ function buildHandoffPrompt(pins) {
 }
 
 // ---- エクスポート ----
-
-function getHandoffText() {
-  return document.getElementById('handoff-text').value.trim();
-}
 
 document.getElementById('export-txt').addEventListener('click', () => {
   chrome.storage.local.get(['pins', 'handoff'], (result) => {
@@ -315,7 +332,6 @@ document.getElementById('export-csv').addEventListener('click', () => {
 document.getElementById('clear-all').addEventListener('click', () => {
   if (!confirm(t('confirmClear'))) return;
   chrome.storage.local.set({ pins: [], handoff: '' }, () => {
-    renderPins([]);
     document.getElementById('handoff-text').value = '';
   });
 });
@@ -330,38 +346,26 @@ function downloadFile(filename, content, type) {
   URL.revokeObjectURL(url);
 }
 
-// ---- ON/OFF切り替え ----
+// ---- ON/OFF切り替え（セグメントコントロール） ----
 let currentEnabled = true;
 
 function applyEnabled() {
-  const btn = document.getElementById('toggle-enabled');
-  if (currentEnabled) {
-    btn.textContent = 'ON';
-    btn.className = 'btn btn-toggle-on';
-  } else {
-    btn.textContent = 'OFF';
-    btn.className = 'btn btn-toggle-off';
-  }
+  document.getElementById('tog-on').checked = currentEnabled;
+  document.getElementById('tog-off').checked = !currentEnabled;
 }
 
-document.getElementById('toggle-enabled').addEventListener('click', () => {
-  currentEnabled = !currentEnabled;
-  chrome.storage.local.set({ enabled: currentEnabled }, () => {
-    applyEnabled();
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, { type: 'ENABLED_CHANGED', enabled: currentEnabled });
-    });
-  });
+document.getElementById('toggle-enabled').addEventListener('change', (e) => {
+  if (e.target.name !== 'tog') return;
+  currentEnabled = (e.target.value === 'on');
+  chrome.storage.local.set({ enabled: currentEnabled });
 });
 
-// ---- 言語切り替え ----
-document.getElementById('lang-toggle').addEventListener('click', () => {
-  currentLang = currentLang === 'ja' ? 'en' : 'ja';
+// ---- 言語切り替え（セグメントコントロール） ----
+document.getElementById('lang-toggle').addEventListener('change', (e) => {
+  if (e.target.name !== 'lang') return;
+  currentLang = e.target.value;
   chrome.storage.local.set({ lang: currentLang }, () => {
     applyLang();
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, { type: 'LANG_CHANGED', lang: currentLang });
-    });
   });
 });
 
@@ -370,11 +374,6 @@ chrome.storage.local.get(['pins', 'lang', 'enabled'], (result) => {
   currentLang = result.lang || 'ja';
   currentEnabled = result.enabled !== false;
   applyEnabled();
-  document.getElementById('clear-all').textContent = t('clearAll');
-  document.getElementById('btn-generate').textContent = t('generate');
-  document.getElementById('btn-copy-handoff').textContent = t('handoffCopy');
-  document.getElementById('handoff-text').placeholder = t('handoffPlaceholder');
-  document.querySelector('.handoff-hint').textContent = t('handoffHint');
-  document.querySelector('.handoff-title').textContent = t('handoffTitle');
+  applyLang();
   renderPins(result.pins || []);
 });
