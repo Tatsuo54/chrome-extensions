@@ -72,7 +72,7 @@ function showContextMenu(e, item) {
             }
         ));
         contextMenu.appendChild(createOption('❌ ' + msg('menuCloseTab'), () => {
-            chrome.tabs.remove(item.id);
+            chrome.tabs.remove(item.id).catch(() => {});
             showToast();
             updateView();
         }));
@@ -229,8 +229,10 @@ function createItemElement(item) {
         closeBtn.title = msg('tooltipCloseTab');
         const actionClose = async (e) => {
             if(e) e.stopPropagation();
-            await chrome.tabs.remove(item.id);
-            showToast();
+            try {
+                await chrome.tabs.remove(item.id);
+                showToast();
+            } catch(err) {}
             updateView();
         };
         closeBtn.onclick = actionClose;
@@ -301,8 +303,10 @@ function appendTreeNodes(node, parentUl, query = "") {
                 if(e) e.stopPropagation();
                 const idsToClose = getAllTabIdsFromNode(childNode);
                 if(idsToClose.length > 0) {
-                    await chrome.tabs.remove(idsToClose);
-                    showToast(msg('toastTabsClosed', [idsToClose.length.toString()]));
+                    try {
+                        await chrome.tabs.remove(idsToClose);
+                        showToast(msg('toastTabsClosed', [idsToClose.length.toString()]));
+                    } catch(err) {}
                     updateView();
                 }
             };
