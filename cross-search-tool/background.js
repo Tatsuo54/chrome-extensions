@@ -73,9 +73,6 @@ async function storeSearch(query, presetIdOverride) {
     }
   });
   await saveToHistory(query, preset.id, preset.name);
-  chrome.action.setBadgeText({ text: '✓' });
-  chrome.action.setBadgeBackgroundColor({ color: '#0066cc' });
-  setTimeout(() => chrome.action.setBadgeText({ text: '' }), 3000);
   broadcast({ type: 'searchUpdated' });
 }
 
@@ -112,17 +109,6 @@ async function handleResultReport(label, count, snippet) {
   data.currentSearch.results = data.currentSearch.results || {};
   data.currentSearch.results[label] = { count, snippet };
   await chrome.storage.local.set({ currentSearch: data.currentSearch });
-
-  const hasWarning = data.currentSearch.searches
-    .filter(s => s.warning)
-    .some(s => {
-      const r = data.currentSearch.results[s.label];
-      return r && r.count > 0;
-    });
-  if (hasWarning) {
-    chrome.action.setBadgeText({ text: '!' });
-    chrome.action.setBadgeBackgroundColor({ color: '#dc3545' });
-  }
   broadcast({ type: 'resultsUpdated' });
 }
 
