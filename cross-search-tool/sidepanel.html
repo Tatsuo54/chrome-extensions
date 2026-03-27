@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; padding: 14px; font-size: 13px; color: #333; }
+    h1 { font-size: 15px; margin-bottom: 12px; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .preset-row { display:flex; gap:6px; align-items:flex-end; margin-bottom:10px; }
+    .preset-row .select-wrap { flex:1; }
+    .preset-row .select-wrap label { font-size:11px; color:#888; display:block; margin-bottom:2px; }
+    .preset-select { width:100%; padding:6px 8px; font-size:13px; border:1px solid #ddd; border-radius:4px; background:white; }
+    .preset-settings-btn { padding:6px 10px; font-size:11px; background:#f5f5f5; border:1px solid #ddd; border-radius:4px; cursor:pointer; color:#555; white-space:nowrap; }
+    .preset-settings-btn:hover { background:#eee; color:#333; }
+
+    .input-row { margin-bottom:6px; }
+    .input-row label { display:block; font-size:11px; color:#888; margin-bottom:2px; }
+    .input-row input { width:100%; padding:7px 9px; font-size:13px; border:1px solid #ddd; border-radius:4px; outline:none; }
+    .input-row input:focus { border-color:#0066cc; }
+    .input-row input.error { border-color:#dc3545; }
+    .btn-row { display:flex; gap:6px; margin-top:6px; }
+    .btn-search { flex:1; padding:8px; font-size:13px; background:#0066cc; color:white; border:none; border-radius:4px; cursor:pointer; }
+    .btn-search:hover { background:#0052a3; }
+    .btn-clear-input { padding:8px 12px; font-size:13px; background:#f5f5f5; color:#666; border:1px solid #ddd; border-radius:4px; cursor:pointer; }
+    .btn-clear-input:hover { background:#eee; color:#333; }
+
+    .results { display:none; }
+    .results.show { display:block; }
+    .results-header { display:flex; justify-content:space-between; align-items:center; margin:12px 0 8px; }
+    .results-header h2 { font-size:13px; }
+    .query-badge { padding:2px 8px; background:#e3f2fd; color:#1565c0; border-radius:10px; font-size:11px; font-family:monospace; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .open-all-btn { width:100%; padding:7px; font-size:12px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer; margin-bottom:4px; }
+    .open-all-btn:hover { background:#218838; }
+    .popup-note { font-size:10px; color:#bbb; text-align:center; margin-bottom:10px; }
+    .link-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:14px; }
+    .link-btn { display:flex; align-items:center; justify-content:center; padding:8px 6px; background:white; border:1px solid #e0e0e0; border-radius:4px; text-decoration:none; color:#333; font-size:12px; text-align:center; transition:all .15s; position:relative; }
+    .link-btn:hover { background:#f5f5f5; border-color:#999; }
+    .link-btn.warning { border-color:#ff9800; background:#fff8e1; color:#e65100; }
+    .link-btn.warning:hover { background:#ffecb3; }
+    .result-badge { position:absolute; top:-5px; right:-5px; padding:1px 5px; border-radius:8px; font-size:9px; font-weight:700; }
+    .result-badge.found { background:#e8f5e9; color:#2e7d32; }
+    .result-badge.alert { background:#ffebee; color:#c62828; }
+    .result-badge.none { background:#f0f0f0; color:#999; }
+    .result-badge.loading { background:#fff3e0; color:#ef6c00; }
+
+    .summary-section { background:white; border:1px solid #e0e0e0; border-radius:4px; padding:10px; margin-bottom:14px; display:none; }
+    .summary-section.show { display:block; }
+    .summary-section h3 { font-size:12px; color:#666; margin-bottom:6px; }
+    .summary-item { display:flex; justify-content:space-between; padding:4px 0; font-size:12px; border-bottom:1px solid #f5f5f5; }
+    .summary-item:last-child { border-bottom:none; }
+    .summary-snippet { font-size:10px; color:#999; margin-top:1px; }
+    .status { font-weight:500; white-space:nowrap; }
+    .status.ok { color:#2e7d32; }
+    .status.warn { color:#e65100; }
+
+    .divider { border-top:1px solid #eee; margin:14px 0; }
+
+    .history-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+    .history-header h3 { font-size:12px; color:#999; }
+    .clear-btn { font-size:10px; color:#dc3545; cursor:pointer; background:none; border:none; }
+    .clear-btn:hover { text-decoration:underline; }
+    .history-list { list-style:none; max-height:180px; overflow-y:auto; }
+    .history-item { padding:6px 4px; cursor:pointer; border-radius:3px; display:flex; justify-content:space-between; font-size:12px; }
+    .history-item:hover { background:#f0f0f0; }
+    .history-date { color:#ccc; font-size:10px; }
+    .history-preset { font-size:9px; color:#999; background:#f0f0f0; padding:1px 5px; border-radius:6px; margin-left:4px; }
+    .no-history { color:#ccc; font-size:12px; }
+    .footer { margin-top:14px; text-align:center; }
+    .footer a { color:#ccc; font-size:10px; text-decoration:none; }
+
+    .back-btn { display:inline-flex; align-items:center; gap:4px; padding:5px 12px; font-size:12px; background:#f5f5f5; border:1px solid #ddd; border-radius:4px; cursor:pointer; color:#555; margin-bottom:12px; }
+    .back-btn:hover { background:#eee; color:#333; }
+    .settings-section { margin-bottom:16px; }
+    .settings-section h3 { font-size:13px; margin-bottom:4px; color:#333; }
+    .settings-desc { font-size:11px; color:#999; margin-bottom:8px; }
+    .preset-card { background:white; border:1px solid #e0e0e0; border-radius:6px; padding:10px; margin-bottom:8px; }
+    .preset-card.custom { border-color:#90caf9; }
+    .preset-card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+    .preset-card-name { font-weight:600; font-size:13px; }
+    .preset-card-locale { font-size:10px; color:#999; background:#f5f5f5; padding:1px 6px; border-radius:8px; }
+    .preset-card-searches { font-size:11px; color:#888; }
+    .preset-actions { display:flex; gap:6px; margin-top:6px; }
+    .preset-actions button { font-size:11px; padding:3px 8px; border-radius:3px; cursor:pointer; border:1px solid #ddd; background:white; }
+    .preset-actions button:hover { background:#f5f5f5; }
+    .preset-actions button.delete { color:#dc3545; border-color:#dc3545; }
+    .preset-actions button.delete:hover { background:#fff5f5; }
+    .btn-add { width:100%; padding:8px; font-size:13px; background:white; color:#0066cc; border:1px dashed #0066cc; border-radius:4px; cursor:pointer; margin-top:8px; }
+    .btn-add:hover { background:#e3f2fd; }
+
+    .modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.3); z-index:100; }
+    .modal-overlay.show { display:flex; align-items:flex-start; justify-content:center; padding-top:20px; }
+    .modal { background:white; border-radius:8px; padding:16px; width:94%; max-height:88vh; overflow-y:auto; }
+    .modal h3 { font-size:14px; margin-bottom:12px; }
+    .modal .input-row { margin-bottom:8px; }
+    .modal .input-row input, .modal .input-row select { width:100%; padding:6px 8px; font-size:12px; border:1px solid #ddd; border-radius:4px; }
+
+    .search-entry { background:#f9f9f9; border:1px solid #eee; border-radius:6px; padding:10px; margin-bottom:8px; position:relative; }
+    .search-entry .remove-entry { position:absolute; top:6px; right:8px; background:none; border:none; color:#dc3545; cursor:pointer; font-size:16px; line-height:1; }
+    .entry-row { display:flex; gap:6px; margin-bottom:4px; }
+    .entry-row .entry-field { flex:1; }
+    .entry-row .entry-field label { font-size:10px; color:#888; display:block; margin-bottom:1px; }
+    .entry-row .entry-field input, .entry-row .entry-field select { width:100%; padding:5px 7px; font-size:12px; border:1px solid #ddd; border-radius:3px; }
+    .entry-query-row { margin-top:4px; }
+    .entry-query-row label { font-size:10px; color:#888; display:block; margin-bottom:1px; }
+    .entry-query-row input { width:100%; padding:5px 7px; font-size:12px; border:1px solid #ddd; border-radius:3px; }
+    .entry-url-preview { margin-top:4px; padding:4px 8px; background:#eef6ff; border-radius:3px; font-size:10px; font-family:monospace; color:#1565c0; word-break:break-all; cursor:pointer; border:1px solid transparent; transition:border-color .15s; }
+    .entry-url-preview:hover { border-color:#90caf9; }
+    .entry-url-preview.editing { background:white; border-color:#0066cc; }
+    .entry-url-edit { display:none; margin-top:4px; }
+    .entry-url-edit input { width:100%; padding:5px 7px; font-size:11px; font-family:monospace; border:1px solid #0066cc; border-radius:3px; }
+    .entry-url-edit.show { display:block; }
+    .entry-options { display:flex; align-items:center; gap:8px; margin-top:4px; }
+    .entry-options label { font-size:11px; color:#666; display:flex; align-items:center; gap:3px; cursor:pointer; }
+    .entry-validation { font-size:10px; color:#dc3545; margin-top:2px; display:none; }
+
+    .btn-add-search { font-size:11px; padding:5px 12px; background:white; border:1px dashed #999; border-radius:3px; cursor:pointer; color:#666; }
+    .btn-add-search:hover { border-color:#0066cc; color:#0066cc; }
+    .modal-actions { display:flex; gap:8px; margin-top:14px; }
+    .modal-actions button { flex:1; padding:8px; border-radius:4px; cursor:pointer; font-size:13px; }
+    .modal-actions .save { background:#0066cc; color:white; border:none; }
+    .modal-actions .save:hover { background:#0052a3; }
+    .modal-actions .cancel { background:white; color:#333; border:1px solid #ddd; }
+    .json-toggle { font-size:11px; color:#0066cc; cursor:pointer; background:none; border:none; margin-bottom:8px; }
+    .json-editor { width:100%; min-height:120px; font-family:monospace; font-size:11px; border:1px solid #ddd; border-radius:4px; padding:8px; display:none; }
+    .json-editor.show { display:block; }
+    .json-error { color:#dc3545; font-size:11px; margin-top:4px; display:none; }
+    .search-count { font-size:10px; color:#999; margin-bottom:6px; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== MAIN PAGE ===== -->
+  <div class="page active" id="pageMain">
+
+    <div class="preset-row">
+      <div class="select-wrap">
+        <label id="i18n-presetLabel"></label>
+        <select class="preset-select" id="presetSelect"></select>
+      </div>
+      <button class="preset-settings-btn" id="openSettings"></button>
+    </div>
+
+    <div class="input-row">
+      <label id="i18n-searchLabel"></label>
+      <input type="text" id="searchInput">
+    </div>
+    <div class="btn-row">
+      <button class="btn-search" id="searchBtn"></button>
+      <button class="btn-clear-input" id="clearInputBtn"></button>
+    </div>
+
+    <div class="results" id="results">
+      <div class="results-header">
+        <h2 id="i18n-searchLinksHeader"></h2>
+        <span class="query-badge" id="queryBadge"></span>
+      </div>
+      <button class="open-all-btn" id="openAllBtn"></button>
+      <p class="popup-note" id="i18n-popupNote"></p>
+      <div class="link-grid" id="linkGrid"></div>
+      <div class="summary-section" id="summarySection">
+        <h3 id="i18n-resultSummaryHeader"></h3>
+        <div id="summaryList"></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="history-header">
+      <h3 id="i18n-historyHeader"></h3>
+      <button class="clear-btn" id="clearBtn"></button>
+    </div>
+    <ul class="history-list" id="historyList"></ul>
+    <div class="footer"><a href="https://cloudavenue.jp" target="_blank" id="i18n-footerLink"></a></div>
+  </div>
+
+  <!-- ===== SETTINGS PAGE ===== -->
+  <div class="page" id="pageSettings">
+    <button class="back-btn" id="backToMain">← <span id="i18n-settingsBack"></span></button>
+    <h1 id="i18n-settingsTitle"></h1>
+
+    <div class="settings-section">
+      <h3 id="i18n-builtinPresetsTitle"></h3>
+      <p class="settings-desc" id="i18n-builtinPresetsDesc"></p>
+      <div id="builtinList"></div>
+    </div>
+
+    <div class="settings-section">
+      <h3 id="i18n-customPresetsTitle"></h3>
+      <p class="settings-desc" id="i18n-customPresetsDesc"></p>
+      <div id="customList"></div>
+      <button class="btn-add" id="addCustomBtn"></button>
+    </div>
+  </div>
+
+  <!-- ===== EDIT MODAL ===== -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <h3 id="modalTitle"></h3>
+      <div class="input-row">
+        <label id="i18n-presetNameLabel"></label>
+        <input type="text" id="editName">
+      </div>
+      <div class="input-row">
+        <label id="i18n-localeLabel"></label>
+        <select id="editLocale">
+          <option value="ja" id="i18n-localeJa"></option>
+          <option value="en" id="i18n-localeEn"></option>
+        </select>
+      </div>
+
+      <div class="divider"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span class="search-count" id="searchCount"></span>
+        <button class="json-toggle" id="jsonToggle"></button>
+      </div>
+      <textarea class="json-editor" id="jsonEditor" placeholder='[{"label":"Google","url":"https://...{query}","warning":false}]'></textarea>
+      <div class="json-error" id="jsonError"></div>
+
+      <div id="searchEntries"></div>
+      <button class="btn-add-search" id="addSearchEntry"></button>
+
+      <div class="modal-actions">
+        <button class="cancel" id="editCancel"></button>
+        <button class="save" id="editSave"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="presets.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
