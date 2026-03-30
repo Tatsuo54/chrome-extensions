@@ -1,0 +1,17 @@
+{
+  "appName": { "message": "Table Clipboard" },
+  "appDesc": { "message": "クリックした表をクリップボードに保持し、後からCSV/TXT/MDで一括ダウンロードします。" },
+  "startBtn": { "message": "現在のページで表を選択" },
+  "allTitle": { "message": "追加した表を一括出力 / 削除" },
+  "deleteAll": { "message": "すべて削除する" },
+  "emptyList": { "message": "リストは空です" },
+  "confirmDelete": { "message": "表をすべて削除しますか？\n（この操作は取り消せません）" },
+  "noData": { "message": "出力するデータがありません" },
+  "deleteItem": { "message": "削除" },
+  "more": { "message": "▼ もっと見る" },
+  "close": { "message": "▲ 閉じる" },
+  "noTable": { "message": "このページには本ツールに追加できる表が見つかりません" },
+  "banner": { "message": "保存したい表をクリックするとサイドパネルに追加されます（Escキーで終了）" },
+  "bannerHover": { "message": "保存したい表をクリックするとサイドパネルに追加されます（Escキーで終了）\n※iframe内の表をホバー中" },
+  "limit": { "message": "追加できる上限（30件）に達しました。不要な表を削除してから再度お試しください" }
+}

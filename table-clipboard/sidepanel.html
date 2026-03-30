@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { width: 320px; padding: 12px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f7; margin: 0;}
+    
+    .btn-main { padding: 12px; background: #007aff; color: white; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 15px; font-size: 13px;}
+    .btn-main:hover { background: #005bb5; }
+    
+    .all-actions { background: #ffffff; padding: 12px; border-radius: 8px; border: 2px solid #d1d5db; margin-bottom: 20px;}
+    .all-actions-title { font-size: 12px; font-weight: bold; text-align: center; color: #475569; margin-bottom: 10px;}
+    .btn-group-all { display: flex; gap: 8px; margin-bottom: 8px;}
+    .btn-dl-all { flex: 1; padding: 8px; font-size: 12px; cursor: pointer; border: 1px solid #cbd5e1; background: #f8fafc; color: #0f172a; border-radius: 4px; font-weight: bold;}
+    .btn-dl-all:hover { background: #e2e8f0; }
+    .btn-delete-all { width: 100%; padding: 8px; font-size: 12px; cursor: pointer; border: 1px solid #fecdd3; background: #fff1f2; color: #e11d48; border-radius: 4px; font-weight: bold;}
+    .btn-delete-all:hover { background: #ffe4e6; }
+
+    .table-item { background: #fff; padding: 10px; border-radius: 6px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #94a3b8;}
+    .table-title { font-size: 12px; font-weight: bold; color: #333; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .table-meta { font-size: 10px; color: #888; margin-bottom: 8px; }
+    
+    .table-preview { font-size: 10px; color: #555; background: #f9f9f9; padding: 5px; margin-bottom: 4px; border: 1px dashed #ccc; max-height: 45px; overflow-y: hidden; white-space: pre-wrap; word-break: break-all; transition: max-height 0.2s ease-out; }
+    .table-preview.expanded { max-height: 400px; overflow-y: auto; }
+    .toggle-preview { font-size: 10px; color: #007aff; text-align: center; cursor: pointer; margin-bottom: 10px; user-select: none; font-weight: bold;}
+    .toggle-preview:hover { text-decoration: underline; }
+
+    .btn-group { display: flex; gap: 5px; margin-bottom: 5px;}
+    .btn-dl { flex: 1; padding: 5px; font-size: 11px; cursor: pointer; border: 1px solid #e2e8f0; background: #ffffff; color: #475569; border-radius: 4px;}
+    .btn-dl:hover { background: #f1f5f9; }
+    .btn-delete { width: 100%; padding: 5px; font-size: 11px; cursor: pointer; border: 1px solid #fecdd3; background: #ffffff; color: #e11d48; border-radius: 4px;}
+    .btn-delete:hover { background: #fff1f2; }
+  </style>
+</head>
+<body>
+  
+  <button id="start-btn" class="btn-main"></button>
+  
+  <div class="all-actions">
+    <div id="all-actions-title" class="all-actions-title"></div>
+    <div class="btn-group-all">
+      <button id="btn-dl-all-csv" class="btn-dl-all">CSV</button>
+      <button id="btn-dl-all-txt" class="btn-dl-all">TXT</button>
+      <button id="btn-dl-all-md" class="btn-dl-all">MD</button>
+    </div>
+    <button id="btn-delete-all" class="btn-delete-all"></button>
+  </div>
+
+  <div id="stock-list"></div>
+
+  <script src="jszip.min.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
