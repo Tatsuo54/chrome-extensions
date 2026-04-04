@@ -1,3 +1,5 @@
+/* AI Chat Pin - Content CSS */
+
 .acp-pin-btn {
   display: block;
   background: none;
@@ -25,81 +27,100 @@
   color: #e8a000;
 }
 
+/* =========================================================
+   1. ホバー時のボタン表示
+========================================================== */
 [data-testid="user-message"]:hover .acp-pin-btn,
 .font-claude-response:hover .acp-pin-btn,
 [data-message-author-role]:hover .acp-pin-btn,
-.user-query-container:hover .acp-pin-btn,
-.response-container:hover .acp-pin-btn,
-.acp-wrapper:hover .acp-pin-btn,
 .mt-6.group:hover .acp-pin-btn,
-.pb-3.group:hover .acp-pin-btn {
+.pb-3.group:hover .acp-pin-btn,
+/* ↓Gemini: ボタン自体がホバーされた時、または直後のメッセージがホバーされた時に表示 */
+.acp-pin-btn--gemini:hover,
+.acp-pin-btn--gemini:has(+ model-response:hover),
+.acp-pin-btn--gemini:has(+ user-query:hover) {
   opacity: 1;
 }
 
-/* ホバー時の背景色 - AIメッセージ（オレンジ薄め） */
+/* =========================================================
+   2. ホバー時の背景色 - AIメッセージ（オレンジ薄め）
+========================================================== */
 .font-claude-response:hover,
 [data-message-author-role="assistant"]:hover,
-.acp-wrapper:has(model-response):hover,
-.pb-3.group:has(.font-claude-response):hover {
+.pb-3.group:has(.font-claude-response):hover,
+/* ↓Gemini: ボタンホバー時の直後AIメッセージ、またはAIメッセージ自体のホバー時 */
+.acp-pin-btn--gemini:hover + model-response,
+model-response:hover {
   background-color: rgba(232, 160, 0, 0.05) !important;
   border-radius: 10px;
   transition: background-color 0.15s;
 }
 
-/* ホバー時の背景色 - ユーザーメッセージ（水色薄め） */
+/* =========================================================
+   3. ホバー時の背景色 - ユーザーメッセージ（水色薄め）
+========================================================== */
 [data-message-author-role="user"]:hover,
-.acp-wrapper:has(user-query):hover,
-.mt-6.group:has([data-testid="user-message"]):hover {
+.mt-6.group:has([data-testid="user-message"]):hover,
+/* ↓Gemini: ボタンホバー時の直後ユーザーメッセージ、またはユーザーメッセージ自体のホバー時 */
+.acp-pin-btn--gemini:hover + user-query,
+user-query:hover {
   background-color: rgba(0, 160, 220, 0.05) !important;
   border-radius: 10px;
   transition: background-color 0.15s;
 }
 
-/* ピン済み - AIメッセージ（オレンジ） */
+/* =========================================================
+   4. ピン済み - AIメッセージ（オレンジ）
+========================================================== */
 .font-claude-response:has(.acp-pinned),
 [data-message-author-role="assistant"]:has(.acp-pinned),
-.acp-wrapper:has(model-response):has(.acp-pinned),
-.pb-3.group:has(.font-claude-response):has(.acp-pinned) {
+.pb-3.group:has(.font-claude-response):has(.acp-pinned),
+/* ↓Gemini: ピン済みのボタンの直後にあるAIメッセージのみに適用 */
+.acp-pin-btn--gemini.acp-pinned + model-response {
   background-color: rgba(232, 160, 0, 0.12) !important;
   border-radius: 10px;
 }
 
-/* ピン済み - ユーザーメッセージ（水色） */
+/* =========================================================
+   5. ピン済み - ユーザーメッセージ（水色）
+========================================================== */
 [data-message-author-role="user"]:has(.acp-pinned),
-.acp-wrapper:has(user-query):has(.acp-pinned),
-.mt-6.group:has([data-testid="user-message"]):has(.acp-pinned) {
+.mt-6.group:has([data-testid="user-message"]):has(.acp-pinned),
+/* ↓Gemini: ピン済みのボタンの直後にあるユーザーメッセージのみに適用 */
+.acp-pin-btn--gemini.acp-pinned + user-query {
   background-color: rgba(0, 160, 220, 0.12) !important;
   border-radius: 10px;
 }
 
-.acp-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end; /* user-queryの右寄せを維持 */
-  width: 100%;
+/* =========================================================
+   6. Gemini特有のレイアウト調整と透過処理
+========================================================== */
+.acp-pin-btn--gemini {
+  margin-bottom: 4px;
 }
 
-/* Gemini: ピン済み時にmodel-response内部の白背景を透明に */
-.acp-wrapper:has(model-response):has(.acp-pinned) model-response,
-.acp-wrapper:has(model-response):has(.acp-pinned) .response-container,
-.acp-wrapper:has(model-response):has(.acp-pinned) message-content {
+.acp-pin-btn--gemini.acp-pinned + model-response .response-container,
+.acp-pin-btn--gemini.acp-pinned + model-response message-content {
   background: transparent !important;
 }
 
-.acp-wrapper > .acp-pin-btn {
-  align-self: flex-end;
-}
-
-/* OFF時：ホバー背景色・ピンボタンを無効化 */
+/* =========================================================
+   7. 拡張機能OFF時の無効化処理
+========================================================== */
 body.acp-disabled .acp-pin-btn:not(.acp-pinned) { display: none !important; }
 body.acp-disabled .font-claude-response:hover,
 body.acp-disabled [data-message-author-role]:hover,
-body.acp-disabled .acp-wrapper:hover,
 body.acp-disabled .mt-6.group:hover,
-body.acp-disabled .pb-3.group:hover {
+body.acp-disabled .pb-3.group:hover,
+body.acp-disabled model-response:hover,
+body.acp-disabled user-query:hover {
   background-color: transparent !important;
   box-shadow: none !important;
 }
+
+/* =========================================================
+   8. ユーザーメッセージ右上の絶対配置ボタン（Claude等）
+========================================================== */
 .acp-pin-btn--absolute {
   position: absolute;
   top: 4px;

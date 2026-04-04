@@ -13,17 +13,14 @@ chrome.storage.local.get(['lang', 'enabled'], (r) => {
     _enabled = false;
     document.body.classList.add('acp-disabled');
   }
-});;
+});
 function tipPinned() { return TOOLTIP[_lang]?.pinned || TOOLTIP.ja.pinned; }
 function tipPin()    { return TOOLTIP[_lang]?.pin    || TOOLTIP.ja.pin;    }
 
 const SITE_CONFIG = {
   'claude.ai': {
-    // ユーザー発言: [data-testid="user-message"]
-    // Claude発言: .font-claude-response（外側コンテナ）
     messageSelector: '[data-testid="user-message"], .font-claude-response',
     getTextContent: (el) => {
-      // Claude発言は空白行を保持する
       const isClaudeMsg = el.classList.contains('font-claude-response');
       return extractStructuredText(el, isClaudeMsg);
     },
@@ -32,7 +29,6 @@ const SITE_CONFIG = {
   'chatgpt.com': {
     messageSelector: '[data-message-author-role]',
     getTextContent: (el) => {
-      // ChatGPT発言は空白行を保持する（ユーザー発言は不要）
       const isAssistant = el.dataset.messageAuthorRole === 'assistant';
       return extractStructuredText(el, isAssistant);
     },
@@ -47,7 +43,6 @@ const SITE_CONFIG = {
         : el.querySelector('message-content .markdown');
       if (!textEl) return '';
       let text = extractStructuredText(textEl, true);
-      // Gemini user-queryの先頭に「あなたのプロンプト」等のラベルが入るため除去
       if (isUser) {
         text = text.replace(/^(?:あなたのプロンプト|Your prompt)\s*/i, '');
       }
@@ -63,13 +58,10 @@ const config = Object.entries(SITE_CONFIG).find(([key]) => hostname.includes(key
 
 if (!config) console.log('AI Chat Pin: unsupported site');
 
-// HTMLを解析して構造化テキストを取得
 function extractStructuredText(el, keepBlankLines = false) {
   const clone = el.cloneNode(true);
   clone.querySelectorAll('.acp-pin-btn').forEach(b => b.remove());
 
-  // cloneNodeはCSSを失うためブロック要素の改行が消える
-  // keepBlankLines時（Gemini）はp/h*/liの末尾に明示的に改行を追加
   if (keepBlankLines) {
     clone.querySelectorAll('p, h1, h2, h3, h4, h5, h6').forEach(node => {
       const inList = node.closest('li');
@@ -79,22 +71,19 @@ function extractStructuredText(el, keepBlankLines = false) {
       node.appendChild(document.createTextNode(nl));
     });
 
-    // ul/olの末尾にも改行を追加（直後のp/h*との間に空白行を確保）
     clone.querySelectorAll('ul, ol').forEach(list => {
-      if (!list.closest('li')) { // ネストリストは除外
+      if (!list.closest('li')) { 
         list.appendChild(document.createTextNode('\n'));
       }
     });
   }
 
-  // li内のpタグをspanに変換（ChatGPT対策：li>pで余分な改行が生じるため）
   clone.querySelectorAll('li p').forEach(p => {
     const span = document.createElement('span');
     span.innerHTML = p.innerHTML;
     p.replaceWith(span);
   });
 
-  // ul > li に中黒を付与（直接の子liのみ、ネストul配下は除外）
   clone.querySelectorAll('ul > li').forEach(li => {
     const directText = Array.from(li.childNodes)
       .filter(n => !(n.nodeType === 1 && n.tagName === 'UL'))
@@ -111,7 +100,6 @@ function extractStructuredText(el, keepBlankLines = false) {
     }
   });
 
-  // ol > li に番号を付与（olごとに1からリセット）
   clone.querySelectorAll('ol').forEach(ol => {
     ol.querySelectorAll(':scope > li').forEach((li, i) => {
       const firstEl = Array.from(li.childNodes).find(n => n.nodeType === 1);
@@ -125,10 +113,10 @@ function extractStructuredText(el, keepBlankLines = false) {
   });
 
   return clone.innerText
-    .replace(/\*\*(.+?)\*\*/g, '$1')          // Geminiの未レンダリングMarkdown太字を除去
-    .replace(/[ \t]+$/gm, '')                   // 行末空白除去
-    .replace(/\n{2,}/g, keepBlankLines ? '\n\n' : '\n') // 空行を1行残す
-    .replace(/\n\n(・|\d+\. )/g, '\n$1')       // リスト項目前の余分な空白行を除去
+    .replace(/\*\*(.+?)\*\*/g, '$1')          
+    .replace(/[ \t]+$/gm, '')                   
+    .replace(/\n{2,}/g, keepBlankLines ? '\n\n' : '\n') 
+    .replace(/\n\n(・|\d+\. )/g, '\n$1')       
     .trim();
 }
 
@@ -149,7 +137,6 @@ function loadPinnedFingerprints(callback) {
 function injectPinButtons() {
   if (!config) return;
 
-  // claude.aiの場合、font-claude-responseはleading-[1.65rem]クラスを持つものだけが本文
   const elements = Array.from(document.querySelectorAll(config.messageSelector)).filter(el => {
     if (el.classList.contains('font-claude-response')) {
       return el.className.includes('leading-[1.65rem]');
@@ -158,8 +145,9 @@ function injectPinButtons() {
   });
 
   elements.forEach(el => {
-    if (el.closest('.acp-wrapper') || el.querySelector('.acp-pin-btn')) return;
-    // ユーザーバブルの場合は親エリアのボタン重複もチェック
+    // 【重要】ラッパーがないため dataset.acpInjected で二重処理を確実にブロック
+    if (el.dataset.acpInjected || el.closest('.acp-wrapper') || el.querySelector('.acp-pin-btn')) return;
+    
     if (el.dataset.testid === 'user-message') {
       const area = el.closest('.mt-6.group');
       if (area && area.querySelector('.acp-pin-btn--absolute')) return;
@@ -168,6 +156,7 @@ function injectPinButtons() {
     const text = config.getTextContent(el);
     if (!text || text.length < 1) return;
 
+    // 初期のテキストでFingerprintを固定
     const fingerprint = getFingerprint(text);
     const isPinned = pinnedFingerprints.has(fingerprint);
 
@@ -186,22 +175,19 @@ function injectPinButtons() {
       }
     });
 
-    // insertBefore:trueの場合はラッパーdivでくるんでその中に挿入
+    // 【重要】Geminiでは要素をラップ（移動）させず、直前に兄弟要素として挿入する
     if (config.insertBefore) {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'acp-wrapper';
-      el.parentNode.insertBefore(wrapper, el);
-      wrapper.appendChild(btn);
-      wrapper.appendChild(el);
+      el.parentNode.insertBefore(btn, el);
+      btn.classList.add('acp-pin-btn--gemini');
+      el.dataset.acpInjected = 'true';
     } else if (el.dataset.testid === 'user-message') {
-      // ユーザーバブルはoverflow:hiddenのため、親エリア(.mt-6.group)にabsolute配置
       const area = el.closest('.mt-6.group') || el.closest('.mb-1.mt-6.group');
       if (area) {
         btn.classList.add('acp-pin-btn--absolute');
         area.style.position = 'relative';
-        // テキスト抽出はelから、ボタンはareaに追加
         btn.dataset.fingerprint = fingerprint;
         area.appendChild(btn);
+        el.dataset.acpInjected = 'true';
       } else {
         el.insertBefore(btn, el.firstChild);
       }
@@ -221,7 +207,7 @@ function pinMessage(el, btn, fingerprint) {
     fingerprint,
     site: hostname,
     label,
-    text: text,
+    text: text, // ピンした時点の最新テキストを取得して保存
     url: location.href,
     timestamp: new Date().toISOString()
   };
@@ -253,11 +239,9 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 loadPinnedFingerprints(() => { if (_enabled) injectPinButtons(); });
 
-// ストレージ変更を監視（言語変更・ON/OFF・全削除に対応）
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;
 
-  // 言語変更
   if (changes.lang) {
     _lang = changes.lang.newValue || 'ja';
     document.querySelectorAll('.acp-pin-btn').forEach(btn => {
@@ -265,7 +249,6 @@ chrome.storage.onChanged.addListener((changes, area) => {
     });
   }
 
-  // ON/OFF変更
   if (changes.enabled !== undefined) {
     _enabled = changes.enabled.newValue !== false;
     if (_enabled) {
@@ -277,7 +260,6 @@ chrome.storage.onChanged.addListener((changes, area) => {
     }
   }
 
-  // 全削除
   if (changes.pins && Array.isArray(changes.pins.newValue) && changes.pins.newValue.length === 0) {
     pinnedFingerprints.clear();
     document.querySelectorAll('.acp-pin-btn.acp-pinned').forEach(btn => {
