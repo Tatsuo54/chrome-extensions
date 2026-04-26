@@ -6,8 +6,7 @@
   "permissions": [
     "sidePanel",
     "contextMenus",
-    "declarativeNetRequest",
-    "scripting"
+    "declarativeNetRequest"
   ],
   "host_permissions": [
     "https://claude.ai/*"
@@ -33,6 +32,7 @@
   "content_scripts": [
     {
       "matches": ["https://claude.ai/settings/usage*"],
+      "css": ["usage-cleanup.css"],
       "js": ["content.js"],
       "run_at": "document_idle",
       "all_frames": true
