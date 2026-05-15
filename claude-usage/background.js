@@ -1,7 +1,5 @@
-// Icon click → side panel
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 
-// Right-click on icon → popup window
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: 'open-usage-window',

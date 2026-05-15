@@ -1,13 +1,11 @@
 {
   "manifest_version": 3,
   "name": "Claude Usage Monitor",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Display Claude usage information in the side panel",
   "permissions": [
     "sidePanel",
-    "contextMenus",
-    "declarativeNetRequest",
-    "scripting"
+    "contextMenus"
   ],
   "host_permissions": [
     "https://claude.ai/*"
@@ -21,23 +19,6 @@
   "background": {
     "service_worker": "background.js"
   },
-  "declarative_net_request": {
-    "rule_resources": [
-      {
-        "id": "remove_frame_headers",
-        "enabled": true,
-        "path": "rules.json"
-      }
-    ]
-  },
-  "content_scripts": [
-    {
-      "matches": ["https://claude.ai/settings/usage*"],
-      "js": ["content.js"],
-      "run_at": "document_idle",
-      "all_frames": true
-    }
-  ],
   "icons": {
     "16": "icon16.png",
     "48": "icon48.png",
