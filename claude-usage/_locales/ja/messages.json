@@ -1,0 +1,61 @@
+{
+  "extName": {
+    "message": "Claude Usage Monitor"
+  },
+  "extDescription": {
+    "message": "Claude の使用量をサイドパネルに表示します"
+  },
+  "loading": {
+    "message": "使用量データを読み込み中…"
+  },
+  "sectionCurrentSession": {
+    "message": "現在のセッション"
+  },
+  "sectionWeeklyLimits": {
+    "message": "週間リミット"
+  },
+  "sectionUsageCredits": {
+    "message": "使用量クレジット"
+  },
+  "labelSession": {
+    "message": "セッション"
+  },
+  "labelAllModels": {
+    "message": "全モデル"
+  },
+  "labelClaudeDesign": {
+    "message": "Claude Design"
+  },
+  "labelLimit": {
+    "message": "上限"
+  },
+  "notEnabled": {
+    "message": "未有効"
+  },
+  "updatedAt": {
+    "message": "$TIME$ に更新",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorTitle": {
+    "message": "使用量データを取得できませんでした"
+  },
+  "errorLoginPrompt": {
+    "message": "claude.ai にログインしていることを確認してください。"
+  },
+  "errorLoginLink": {
+    "message": "claude.ai にログイン"
+  },
+  "errorRetryPrompt": {
+    "message": "ログイン後、下のボタンで再取得してください。"
+  },
+  "retry": {
+    "message": "再取得"
+  },
+  "contextMenuOpenWindow": {
+    "message": "使用量をウィンドウで開く"
+  }
+}

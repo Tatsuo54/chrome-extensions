@@ -1,53 +1,19 @@
-const BASE = 'https://claude.ai/api';
-let cachedOrg = null;
+// Claude Usage Monitor - Sidepanel UI
 
-async function getOrg() {
-  if (cachedOrg) return cachedOrg;
-  const res = await fetch(`${BASE}/organizations`, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed to fetch organization info. Are you logged in to claude.ai?');
-  const orgs = await res.json();
-  if (!orgs.length) throw new Error('No organization found.');
-  cachedOrg = orgs[0];
-  return cachedOrg;
-}
+const m = chrome.i18n.getMessage;
 
-function getPlanName(org) {
-  const caps = org.capabilities || [];
-  if (caps.includes('claude_enterprise')) return 'Enterprise';
-  if (caps.includes('claude_team')) return 'Team';
-  if (caps.includes('claude_pro')) return 'Pro';
-  return 'Free';
-}
+// Set loading text on init
+document.querySelector('.loading').textContent = m('loading');
 
-async function fetchUsage() {
-  const org = await getOrg();
-  const res = await fetch(`${BASE}/organizations/${org.uuid}/usage`, {
-    credentials: 'include'
-  });
-  if (!res.ok) throw new Error(`API returned ${res.status}`);
-  return res.json();
-}
-
-function formatTimeRemaining(resetAt) {
-  if (!resetAt) return '';
-  const diff = new Date(resetAt) - new Date();
-  if (diff <= 0) return 'Resetting…';
-  const hrs = Math.floor(diff / 3600000);
-  const mins = Math.floor((diff % 3600000) / 60000);
-  if (hrs > 0) return `Resets in ${hrs} hr ${mins} min`;
-  return `Resets in ${mins} min`;
-}
-
-function renderCard(label, utilization, resetAt, fillClass) {
+function renderCard(label, utilization, resetText, fillClass) {
   const pct = utilization ?? 0;
-  const meta = formatTimeRemaining(resetAt);
   return `
     <div class="usage-card">
       <div class="usage-row">
         <span class="usage-label">${label}</span>
         <span class="usage-value">${pct}%</span>
       </div>
-      ${meta ? `<div class="usage-meta">${meta}</div>` : ''}
+      ${resetText ? `<div class="usage-meta">${resetText}</div>` : ''}
       <div class="progress-bar">
         <div class="progress-fill ${fillClass}" style="width:${pct}%"></div>
       </div>
@@ -55,33 +21,29 @@ function renderCard(label, utilization, resetAt, fillClass) {
   `;
 }
 
-function renderExtraUsage(extra) {
-  if (!extra || !extra.is_enabled) {
+function renderUsageCredits(credits) {
+  if (!credits || !credits.enabled) {
     return `
       <div class="section">
-        <div class="section-title">Extra Usage</div>
+        <div class="section-title">${m('sectionUsageCredits')}</div>
         <div class="usage-card">
-          <div class="not-enabled">Not enabled</div>
+          <div class="not-enabled">${m('notEnabled')}</div>
         </div>
       </div>
     `;
   }
-  const pct = extra.utilization ?? 0;
-  const spent = extra.used_credits != null
-    ? `$${(extra.used_credits / 100).toFixed(2)}`
-    : '$0.00';
-  const limit = extra.monthly_limit != null
-    ? `$${(extra.monthly_limit / 100).toFixed(0)}`
-    : '—';
+  const pct = credits.utilization ?? 0;
+  const spent = credits.spent ? `$${credits.spent}` : '$0.00';
+  const limit = credits.limit ? `$${credits.limit}` : '—';
   return `
     <div class="section">
-      <div class="section-title">Extra Usage</div>
+      <div class="section-title">${m('sectionUsageCredits')}</div>
       <div class="usage-card">
         <div class="usage-row">
           <span class="extra-amount">${spent}</span>
           <span class="usage-value">${pct}%</span>
         </div>
-        <div class="usage-meta">Limit: ${limit}</div>
+        <div class="usage-meta">${m('labelLimit')}: ${limit}${credits.resetText ? ' · ' + credits.resetText : ''}</div>
         <div class="progress-bar">
           <div class="progress-fill fill-extra" style="width:${pct}%"></div>
         </div>
@@ -90,10 +52,9 @@ function renderExtraUsage(extra) {
   `;
 }
 
-async function render(data) {
+function render(data) {
   const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const org = await getOrg();
-  const plan = getPlanName(org);
+  const plan = data.plan || 'Free';
 
   document.getElementById('app').innerHTML = `
     <div class="header">
@@ -106,50 +67,82 @@ async function render(data) {
     </div>
 
     <div class="section">
-      <div class="section-title">Current Session</div>
-      ${renderCard('Session', data.five_hour?.utilization, data.five_hour?.resets_at, 'fill-session')}
+      <div class="section-title">${m('sectionCurrentSession')}</div>
+      ${renderCard(m('labelSession'), data.session?.utilization, data.session?.resetText, 'fill-session')}
     </div>
 
     <div class="section">
-      <div class="section-title">Weekly Limits</div>
-      ${renderCard('All Models', data.seven_day?.utilization, data.seven_day?.resets_at, 'fill-weekly')}
-      ${renderCard('Claude Design', data.seven_day_omelette?.utilization, data.seven_day_omelette?.resets_at, 'fill-design')}
+      <div class="section-title">${m('sectionWeeklyLimits')}</div>
+      ${renderCard(m('labelAllModels'), data.weekly?.utilization, data.weekly?.resetText, 'fill-weekly')}
+      ${renderCard(m('labelClaudeDesign'), data.claudeDesign?.utilization, null, 'fill-design')}
     </div>
 
-    ${renderExtraUsage(data.extra_usage)}
+    ${renderUsageCredits(data.usageCredits)}
 
-    <div class="updated">Updated at ${now}</div>
+    <div class="updated">${m('updatedAt', [now])}</div>
   `;
 
-  document.getElementById('refresh-btn').addEventListener('click', () => refresh());
+  document.getElementById('refresh-btn').addEventListener('click', () => requestFreshData());
 }
 
-function renderError(err) {
+function renderError() {
   document.getElementById('app').innerHTML = `
     <div class="error-box">
-      <strong>Failed to load usage data</strong><br>
-      ${err.message}<br><br>
-      Make sure you're logged in to <a href="https://claude.ai" target="_blank">claude.ai</a>, then try again.
-      <br><br>
-      <button class="refresh-btn" id="retry-btn">Retry</button>
+      <strong>${m('errorTitle')}</strong><br><br>
+      ${m('errorLoginPrompt')}<br><br>
+      <a href="#" id="login-link">${m('errorLoginLink')}</a><br><br>
+      ${m('errorRetryPrompt')}<br><br>
+      <button class="refresh-btn" id="retry-btn">${m('retry')}</button>
     </div>
   `;
-  document.getElementById('retry-btn').addEventListener('click', () => refresh());
+  document.getElementById('retry-btn').addEventListener('click', () => requestFreshData());
+  document.getElementById('login-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    chrome.tabs.create({ url: 'https://claude.ai/login' });
+  });
 }
 
-async function refresh() {
+function requestFreshData() {
   const btn = document.getElementById('refresh-btn');
   if (btn) {
     btn.classList.add('spinning');
     btn.disabled = true;
   }
-  try {
-    const data = await fetchUsage();
-    await render(data);
-  } catch (err) {
-    renderError(err);
-  }
+
+  const requestTime = Date.now();
+
+  chrome.runtime.sendMessage({ action: 'fetch-usage' }, (response) => {
+    let attempts = 0;
+    const poll = setInterval(() => {
+      attempts++;
+      chrome.storage.local.get(['usageData', 'lastUpdated'], (result) => {
+        if (result.usageData && result.lastUpdated && result.lastUpdated > requestTime) {
+          clearInterval(poll);
+          render(result.usageData);
+        } else if (attempts > 10) {
+          clearInterval(poll);
+          renderError();
+        }
+      });
+    }, 1000);
+  });
 }
 
-refresh();
-setInterval(() => refresh(), 60000);
+// On load: check storage first, then request fresh data
+chrome.storage.local.get(['usageData', 'lastUpdated'], (result) => {
+  if (result.usageData && result.lastUpdated && (Date.now() - result.lastUpdated < 120000)) {
+    render(result.usageData);
+  } else {
+    requestFreshData();
+  }
+});
+
+// Listen for updates from content script via storage
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.usageData) {
+    render(changes.usageData.newValue);
+  }
+});
+
+// Auto-refresh every 60 seconds
+setInterval(() => requestFreshData(), 60000);

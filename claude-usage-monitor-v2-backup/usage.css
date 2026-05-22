@@ -9,6 +9,7 @@
   --bar-session: #c96442;
   --bar-weekly: #3b7dd8;
   --bar-design: #8b6cc1;
+  --bar-routine: #5a9e6f;
   --bar-extra: #d4a843;
   --error-bg: #fef2f2;
   --error-text: #b91c1c;
@@ -151,6 +152,7 @@ body {
 .fill-session { background: var(--bar-session); }
 .fill-weekly { background: var(--bar-weekly); }
 .fill-design { background: var(--bar-design); }
+.fill-routine { background: var(--bar-routine); }
 .fill-extra { background: var(--bar-extra); }
 
 .extra-amount {

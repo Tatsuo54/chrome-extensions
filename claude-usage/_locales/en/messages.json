@@ -1,0 +1,61 @@
+{
+  "extName": {
+    "message": "Claude Usage Monitor"
+  },
+  "extDescription": {
+    "message": "Display Claude usage information in the side panel"
+  },
+  "loading": {
+    "message": "Loading usage data…"
+  },
+  "sectionCurrentSession": {
+    "message": "Current Session"
+  },
+  "sectionWeeklyLimits": {
+    "message": "Weekly Limits"
+  },
+  "sectionUsageCredits": {
+    "message": "Usage Credits"
+  },
+  "labelSession": {
+    "message": "Session"
+  },
+  "labelAllModels": {
+    "message": "All Models"
+  },
+  "labelClaudeDesign": {
+    "message": "Claude Design"
+  },
+  "labelLimit": {
+    "message": "Limit"
+  },
+  "notEnabled": {
+    "message": "Not enabled"
+  },
+  "updatedAt": {
+    "message": "Updated at $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorTitle": {
+    "message": "Failed to load usage data"
+  },
+  "errorLoginPrompt": {
+    "message": "Make sure you are logged in to claude.ai."
+  },
+  "errorLoginLink": {
+    "message": "Log in to claude.ai"
+  },
+  "errorRetryPrompt": {
+    "message": "After logging in, click the button below to retry."
+  },
+  "retry": {
+    "message": "Retry"
+  },
+  "contextMenuOpenWindow": {
+    "message": "Open Usage in Window"
+  }
+}
