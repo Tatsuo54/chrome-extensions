@@ -1,4 +1,4 @@
-# Privacy Policy — Cascade: Tab & Bookmark Organizer
+# Privacy Policy — Cascade: Tab & Bookmark Organiser
 
 **Last updated: March 2026**
 

@@ -2,6 +2,7 @@
   "extName": { "message": "Cross Search Tool" },
   "extDescription": { "message": "店舗名や製品名を右クリックやサイドパネルからクロス検索。閉業・移転情報もワンクリックでチェック。" },
   "contextMenuSelection": { "message": "クロス検索: \"$TEXT$\"", "placeholders": { "TEXT": { "content": "$1" } } },
+  "contextMenuOpenWindow": { "message": "別ウィンドウで開く" },
 
   "presetLabel": { "message": "プリセット" },
   "presetSettings": { "message": "プリセット設定" },

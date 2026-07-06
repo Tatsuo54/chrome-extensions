@@ -10,6 +10,11 @@ chrome.runtime.onInstalled.addListener(() => {
     title: chrome.i18n.getMessage('contextMenuSelection', ['%s']) || 'Cross Search: "%s"',
     contexts: ['selection']
   });
+  chrome.contextMenus.create({
+    id: 'open-in-window',
+    title: chrome.i18n.getMessage('contextMenuOpenWindow') || 'Open in Window',
+    contexts: ['action']
+  });
 });
 
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
@@ -45,6 +50,15 @@ function buildUrls(preset, query) {
 
 // --- Context Menu ---
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  if (info.menuItemId === 'open-in-window') {
+    chrome.windows.create({
+      url: 'sidepanel.html',
+      type: 'popup',
+      width: 420,
+      height: 700
+    });
+    return;
+  }
   if (info.menuItemId === 'crossCheck' && info.selectionText) {
     await storeSearch(info.selectionText.trim());
     openSidePanel(tab);

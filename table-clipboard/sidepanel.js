@@ -21,7 +21,16 @@ function updateUILanguage() {
 updateUILanguage();
 
 document.getElementById('start-btn').addEventListener('click', async () => {
-  let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  let tab;
+  const currentWin = await chrome.windows.getCurrent();
+  if (currentWin.type === 'popup') {
+    // 別ウィンドウ表示時は、直前にフォーカスされていた通常ウィンドウのアクティブタブを対象にする
+    const lastWin = await chrome.windows.getLastFocused({ windowTypes: ['normal'] });
+    [tab] = await chrome.tabs.query({ active: true, windowId: lastWin.id });
+  } else {
+    [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  }
+  if (!tab) return;
   chrome.scripting.executeScript({
     target: { 
       tabId: tab.id,

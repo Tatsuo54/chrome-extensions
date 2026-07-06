@@ -2,6 +2,7 @@
   "extName": { "message": "Cross Search Tool" },
   "extDescription": { "message": "Cross-search shops, products, and services across multiple platforms with one click. Check closure and relocation info too." },
   "contextMenuSelection": { "message": "Cross Search: \"$TEXT$\"", "placeholders": { "TEXT": { "content": "$1" } } },
+  "contextMenuOpenWindow": { "message": "Open in Window" },
 
   "presetLabel": { "message": "Preset" },
   "presetSettings": { "message": "Preset settings" },

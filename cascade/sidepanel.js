@@ -352,7 +352,10 @@ function appendTreeNodes(node, parentUl, query = "") {
 // ==========================================
 async function fetchTabs() {
     const tabs = await chrome.tabs.query({});
-    return tabs.map(tab => ({ title: tab.title, url: tab.url, id: tab.id, type: 'tab', pinned: tab.pinned, audible: tab.audible }));
+    // 本拡張自身のページ（別ウィンドウ表示のポップアップなど）は一覧から除外
+    return tabs
+        .filter(tab => !(tab.url && tab.url.startsWith(chrome.runtime.getURL(''))))
+        .map(tab => ({ title: tab.title, url: tab.url, id: tab.id, type: 'tab', pinned: tab.pinned, audible: tab.audible }));
 }
 
 async function fetchBookmarks() {

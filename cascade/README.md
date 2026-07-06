@@ -1,4 +1,4 @@
-# Cascade: Tab & Bookmark Organizer
+# Cascade: Tab & Bookmark Organiser
 
 開いているタブとブックマークをサイドパネルにドメインごとのツリー表示で整理するChrome拡張機能です。
 

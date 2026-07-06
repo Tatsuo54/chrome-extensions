@@ -1,6 +1,6 @@
 {
   "extName": {
-    "message": "Cascade: Tab & Bookmark Organizer"
+    "message": "Cascade: Tab & Bookmark Organiser"
   },
   "extDescription": {
     "message": "View and organize your open tabs and bookmarks in a side panel, grouped by domain in a clean tree view."
@@ -63,5 +63,8 @@
   },
   "loading": {
     "message": "Loading..."
+  },
+  "contextMenuOpenWindow": {
+    "message": "Open in Window"
   }
 }

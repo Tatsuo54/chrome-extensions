@@ -5,7 +5,8 @@
   "description": "Pin important AI chat messages for handoff and note-taking. Supports Claude, ChatGPT, and Gemini.",
   "permissions": [
     "storage",
-    "sidePanel"
+    "sidePanel",
+    "contextMenus"
   ],
   "host_permissions": [
     "https://claude.ai/*",

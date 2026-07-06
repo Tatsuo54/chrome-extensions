@@ -13,5 +13,6 @@
   "noTable": { "message": "No compatible tables found on this page" },
   "banner": { "message": "Click a table you want to save to add it to the side panel (Press Esc to exit)" },
   "bannerHover": { "message": "Click a table you want to save to add it to the side panel (Press Esc to exit)\n* Hovering table in iframe" },
-  "limit": { "message": "Maximum limit (30) reached. Please delete some tables and try again" }
+  "limit": { "message": "Maximum limit (30) reached. Please delete some tables and try again" },
+  "contextMenuOpenWindow": { "message": "Open in Window" }
 }

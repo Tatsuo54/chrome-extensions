@@ -9,7 +9,8 @@
     "tabs",
     "bookmarks",
     "favicon",
-    "sessions"
+    "sessions",
+    "contextMenus"
   ],
   "background": {
     "service_worker": "background.js"
